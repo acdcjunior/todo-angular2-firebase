@@ -1,9 +1,9 @@
-const argv = require('yargs').argv;
 const path = require('path');
 
 const autoprefixer = require('autoprefixer');
 const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -124,6 +124,9 @@ if (ENV_DEVELOPMENT || ENV_PRODUCTION) {
       name: ['vendor', 'polyfills'],
       minChunks: Infinity
     }),
+    new CopyWebpackPlugin([
+      {from: './assets/favicons', to: '.'}
+    ]),
     new HtmlWebpackPlugin({
       chunkSortMode: 'dependency',
       filename: 'index.html',
@@ -207,24 +210,4 @@ if (ENV_TEST) {
   config.devtool = 'inline-source-map';
 
   config.module.loaders.push(loaders.sharedStyles);
-
-  if (argv.coverage) {
-    config.module.postLoaders = [{
-      test: /\.ts$/,
-      loader: 'istanbul-instrumenter-loader',
-      include: path.resolve('src'),
-      exclude: [
-        /\.spec\.ts$/,
-        /node_modules/
-      ]
-    }];
-
-    // override tsconfig.json
-    config.ts = {
-      compilerOptions: {
-        inlineSourceMap: true,
-        sourceMap: false
-      }
-    };
-  }
 }
